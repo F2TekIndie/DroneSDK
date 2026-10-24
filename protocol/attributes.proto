@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package dronegroundcontrol;
+
+
+message Position{
+    string lat = 1;
+    string long = 2;
+}
+
+message Attribute{
+    string name = 1;
+
+    oneof value{
+        bool bValue = 2;
+        string sValue = 3;
+        uint32 iValue = 4;
+        Position pos = 5;
+    }
+}
+
+message Attributes{
+    repeated Attribute timeseries = 1;
+}

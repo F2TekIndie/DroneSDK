@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package dronegroundcontrol;
+
+
+message TimeSerie{
+    string name = 1;
+    string timestamp = 2;
+
+    oneof value{
+        bool bValue = 3;
+        string sValue = 4;
+        uint32 iValue = 5;
+    }
+}
+
+message TimeSeries{
+    uint32 start = 1;
+    uint32 range = 2;
+    repeated TimeSerie timeseries = 3;
+}

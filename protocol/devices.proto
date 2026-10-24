@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package dronegroundcontrol;
+
+
+message Device{
+    string name = 1;
+    string type = 2;
+}
+
+message Devices{
+    uint32 start = 1;
+    uint32 range = 2;
+    repeated Device devicelist = 3;
+}
