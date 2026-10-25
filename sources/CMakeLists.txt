@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.20)
+﻿cmake_minimum_required(VERSION 3.20)
 project(DGCSources LANGUAGES CXX)
 
 add_library(DGCSources STATIC
         drone.cpp drone.h
-        asio.cpp asio.h
         mqtt.cpp mqtt.h
 )
 
@@ -14,4 +13,3 @@ target_include_directories(DGCSources PUBLIC
 
 target_link_libraries(DGCSources PUBLIC
 )
-

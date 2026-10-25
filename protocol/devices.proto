@@ -3,6 +3,12 @@ syntax = "proto3";
 package dronegroundcontrol;
 
 
+service DeviceFunctions{
+    rpc CreateDevice( Client ) returns ( Device );
+    rpc DeletDevice( Device ) returns ( DeviceStatusReply );
+    rpc ListDevices( Client ) returns ( Devices );
+}
+
 message Client{
     uint32 id = 1;
     string name = 2;
@@ -19,4 +25,8 @@ message Devices{
     uint32 start = 1;
     uint32 range = 2;
     repeated Device devicelist = 3;
+}
+
+message DeviceStatusReply{
+    bool success = 1;
 }

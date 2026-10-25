@@ -2,6 +2,13 @@ syntax = "proto3";
 
 package dronegroundcontrol;
 
+import "devices.proto";
+
+service TimeseriesFunctions{
+    rpc AddTimeseries( TimeseriesRequest ) returns (TimeseriesStatusReply);
+    rpc GetTimeseries( Device ) returns (TimeSerie);
+    rpc GetTimeseriesRange( Device ) returns (TimeSeries);
+}
 
 message TimeSerie{
     string name = 1;
@@ -18,4 +25,13 @@ message TimeSeries{
     uint32 start = 1;
     uint32 range = 2;
     repeated TimeSerie timeseries = 3;
+}
+
+message TimeseriesRequest{
+    Device device = 1;
+    TimeSerie data = 2;
+}
+
+message TimeseriesStatusReply{
+    bool success = 1;
 }

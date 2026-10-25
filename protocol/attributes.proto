@@ -2,6 +2,15 @@ syntax = "proto3";
 
 package dronegroundcontrol;
 
+import "devices.proto";
+
+service AttributeFunctions{
+    rpc UpdateAttribute( AttributeRequest ) returns (AttributeStatusReply);
+    rpc GetAttribute( Device ) returns (Attribute);
+    rpc GetAttributes( Device ) returns (Attributes);
+    rpc UpdatePosition( PositionRequest ) returns (AttributeStatusReply);
+    rpc GetPosition( Device ) returns (Position);
+}
 
 message Position{
     string lat = 1;
@@ -22,3 +31,18 @@ message Attribute{
 message Attributes{
     repeated Attribute timeseries = 1;
 }
+
+message AttributeRequest{
+	Device device = 1;
+	Attribute attrib = 2;
+}
+
+message PositionRequest{
+	Device device = 1;
+	Position pos = 2;
+}
+
+message AttributeStatusReply{
+    bool success = 1;
+}
+
