@@ -1,14 +1,15 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 project(DGCSources LANGUAGES CXX)
 
 add_library(DGCSources STATIC
         drone.cpp drone.h
+        asio.cpp asio.h
+        mqtt.cpp mqtt.h
 )
 
 
-# Generated headers are written into this library's build directory.
 target_include_directories(DGCSources PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
 target_link_libraries(DGCSources PUBLIC

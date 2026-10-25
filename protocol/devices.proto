@@ -3,9 +3,16 @@ syntax = "proto3";
 package dronegroundcontrol;
 
 
+message Client{
+    uint32 id = 1;
+    string name = 2;
+}
+
 message Device{
-    string name = 1;
-    string type = 2;
+    uint32 id = 1;
+    string name = 2;
+    string type = 3;
+    Client client_id = 4;
 }
 
 message Devices{
