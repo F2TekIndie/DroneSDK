@@ -6,8 +6,8 @@ import "devices.proto";
 
 service TimeseriesFunctions{
     rpc AddTimeseries( TimeseriesRequest ) returns (TimeseriesStatusReply);
-    rpc GetTimeseries( Device ) returns (TimeSerie);
-    rpc GetTimeseriesRange( Device ) returns (TimeSeries);
+    rpc GetTimeseries( TimeseriesQuery ) returns (TimeSerie);
+    rpc GetTimeseriesRange( TimeseriesRangeQuery ) returns (TimeSeries);
 }
 
 message TimeSerie{
@@ -29,9 +29,26 @@ message TimeSeries{
 
 message TimeseriesRequest{
     Device device = 1;
-    TimeSerie data = 2;
+    TimeSerie data = 2; // Legacy single sample.
+    TimeSeries timeseries = 3; // Batch; do not also set data.
 }
 
 message TimeseriesStatusReply{
     bool success = 1;
+}
+
+// Select latitude or longitude. Omit timestamp_ms to get the latest sample.
+message TimeseriesQuery{
+    Device device = 1;
+    string name = 2;
+    optional int64 timestamp_ms = 3;
+}
+
+// Inclusive UTC Unix millisecond bounds; omitted bounds are unbounded.
+// Results are ordered by timestamp ascending. Empty name returns both coordinates.
+message TimeseriesRangeQuery{
+    Device device = 1;
+    string name = 2;
+    optional int64 start_timestamp_ms = 3;
+    optional int64 end_timestamp_ms = 4;
 }

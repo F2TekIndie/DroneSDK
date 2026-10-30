@@ -6,7 +6,7 @@ import "devices.proto";
 
 service AttributeFunctions{
     rpc UpdateAttribute( AttributeRequest ) returns (AttributeStatusReply);
-    rpc GetAttribute( Device ) returns (Attribute);
+    rpc GetAttribute( AttributeQuery ) returns (Attribute);
     rpc GetAttributes( Device ) returns (Attributes);
     rpc UpdatePosition( PositionRequest ) returns (AttributeStatusReply);
     rpc GetPosition( Device ) returns (Position);
@@ -34,7 +34,8 @@ message Attributes{
 
 message AttributeRequest{
 	Device device = 1;
-	Attribute attrib = 2;
+	Attribute attrib = 2; // Legacy single value.
+    Attributes attributes = 3; // Batch; do not also set attrib.
 }
 
 message PositionRequest{
@@ -46,3 +47,9 @@ message AttributeStatusReply{
     bool success = 1;
 }
 
+
+// Select one supported current attribute: online, state, or position.
+message AttributeQuery{
+    Device device = 1;
+    string name = 2;
+}
