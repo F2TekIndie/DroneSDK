@@ -9,6 +9,7 @@ add_library(DGCProto STATIC
 	timeseries.proto
 	attributes.proto
 	devices.proto
+	streams.proto
 )
 
 protobuf_generate(

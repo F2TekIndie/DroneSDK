@@ -1,0 +1,39 @@
+syntax = "proto3";
+package dronegroundcontrol;
+import "devices.proto";
+
+service StreamingFunctions{
+    rpc CreateStream( StreamWriteRequest ) returns ( StreamingServer );
+    rpc UpdateStream( StreamWriteRequest ) returns ( StreamingServer );
+    rpc GetStream( StreamQuery ) returns ( StreamingServer );
+    rpc ListStreams( Device ) returns ( StreamingServers );
+    rpc DeleteStream( StreamQuery ) returns ( DeviceStatusReply );
+    rpc SelectCameraStream( StreamQuery ) returns ( Device );
+}
+
+// Host is the local receive/bind address. This configuration does not start playback.
+message StreamingServer{
+    string drone_id = 1;
+    string stream_id = 2;
+    string host = 3;
+    uint32 port = 4;
+    string transport = 5; // UDP or TCP.
+}
+message StreamWriteRequest{
+    Device device = 1;
+    StreamingServer stream = 2; // Create allocates stream_id; update requires it.
+}
+message StreamQuery{
+    Device device = 1;
+    string stream_id = 2; // Empty only for SelectCameraStream: clear selection.
+}
+message StreamingServers{
+    repeated StreamingServer servers = 1;
+}
+
+// MQTT /device/<uuid>/stream: upsert this stream and select it for the device.
+// The publisher allocates stream_id; replay of the same UUID updates the same entry.
+message StreamAnnouncement{
+    Device device = 1;
+    StreamingServer stream = 2;
+}

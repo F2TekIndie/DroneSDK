@@ -11,7 +11,8 @@ protocol/
 ├── CMakeLists.txt
 ├── devices.proto
 ├── attributes.proto
-└── timeseries.proto
+├── timeseries.proto
+└── streams.proto
 ```
 
 All definitions use the package `dronegroundcontrol`. The SDK contains schemas
@@ -146,10 +147,11 @@ UUID plus timestamp identifies a position pair, so replay updates that pair.
 | `/device/<uuid>` | `Device` | Existing identity and name metadata. |
 | `/device/<uuid>/attributes` | `AttributeRequest` | One batch containing online and state. |
 | `/device/<uuid>/timeseries` | `TimeseriesRequest` | One batch containing latitude and longitude with a shared timestamp. |
+| `/device/<uuid>/stream` | `StreamAnnouncement` | Create/update and select a camera stream for an existing drone. |
 | `/status` | Undefined | Server subscribes, but does not decode/store a payload. |
 
 The server subscribes to `/device/+`, `/device/+/attributes`,
-`/device/+/timeseries`, and `/status`. The topic structure selects the message
+`/device/+/timeseries`, `/device/+/stream`, and `/status`. The topic structure selects the message
 type; payload content remains authoritative for drone/client identity. The topic
 UUID is not compared with the payload UUID or used for cache lookup.
 
@@ -175,3 +177,42 @@ ctest --test-dir ../DGCServer/build/local --output-on-failure
 
 Build each consumer with `BUILD_TESTING=ON` first; see its README for dependencies
 and configuration.
+
+## Stream configuration API
+
+`Device.camera_stream_id` (optional field 5) carries the selected stream UUID.
+Absence means no stream is selected. `streams.proto` adds `StreamingServer` with
+`drone_id`, `stream_id`, `host`, numeric `port`, and `transport`. Host is the local
+receive/bind address; accepted transports are `UDP` and `TCP`, ports 1–65535.
+This API does not start or reconfigure video playback.
+
+`StreamingFunctions` exposes `CreateStream`, `UpdateStream`, `GetStream`,
+`ListStreams`, `DeleteStream`, and `SelectCameraStream`. Writes use
+`StreamWriteRequest {device, stream}`. Create leaves `stream_id` empty and returns
+a server-allocated UUID; update requires an existing UUID and a complete endpoint.
+The endpoint's `drone_id` may be omitted on writes or must match `device.id`.
+Queries use `StreamQuery {device, stream_id}`; only selection permits an empty
+stream ID, to clear it. List takes `Device` and returns `StreamingServers.servers`.
+Create/update/get return `StreamingServer`, delete returns `DeviceStatusReply`,
+and selection returns updated `Device`.
+
+All operations require an existing cached drone and matching nonzero client ID.
+Each drone may own multiple configurations and select one of its own streams.
+Creation does not auto-select. Deleting the selected stream clears the reference;
+deleting a drone removes its streams. Endpoint configuration uses these RPCs or MQTT stream announcements;
+MQTT metadata updates do not set camera selection. Rebuild both consumers after
+schema changes and initialize a fresh database with the current server schema.
+
+### MQTT camera stream announcements
+
+`StreamAnnouncement` contains `Device device` and `StreamingServer stream`.
+Publish it to `/device/<uuid>/stream`; the server subscribes to `/device/+/stream`.
+Unlike the gRPC create call, this announcement requires a publisher-allocated
+canonical stream UUID. The payload's device/client identity selects the existing
+cached drone. The endpoint's `drone_id`, if present, must match the payload device.
+
+The server upserts the stream by its composite key and selects it for the drone
+in one cache operation. Repeated/retained delivery of the same stream UUID does
+not create additional configurations. Invalid announcements change neither the
+endpoint nor the selection. The DB worker persists these changes asynchronously.
+Default simulator endpoints are `127.0.0.1:5600` over `UDP`; playback is unchanged.
